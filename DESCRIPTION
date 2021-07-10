@@ -1,0 +1,17 @@
+Package: TownforgeMMbot
+Title: Market Maker Bot for Townforge
+Version: 0.1.0
+Authors@R: c(	person(given = "Rucknium", email = "Rucknium@protonmail.com",
+		role = c("aut", "cre")) )
+Description: Manages bots for market making in the commodity markets of Townforge,
+  a blockchain-based game originally forked from Monero.
+	Regarding Townforge, see further info at: www.townforge.net
+Depends: R (>= 4.0.0)
+License: All rights reserved, for now
+LazyData: true
+RoxygenNote: 7.1.1
+Encoding: UTF-8
+Imports:
+	TownforgeR
+Remotes:
+  Syksy/TownforgeR 
