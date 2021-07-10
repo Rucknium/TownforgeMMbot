@@ -2,7 +2,8 @@
 #'
 #' Description
 #'
-#' @param url TODO
+#' @param url.townforged TODO
+#' @param url.wallet TODO
 #' @param commodity.id TODO
 #' @param	bot.account.id TODO
 #' @param	order.quantity TODO

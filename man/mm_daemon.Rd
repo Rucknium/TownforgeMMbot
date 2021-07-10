@@ -17,6 +17,10 @@ mm_daemon(
 )
 }
 \arguments{
+\item{url.townforged}{TODO}
+
+\item{url.wallet}{TODO}
+
 \item{commodity.id}{TODO}
 
 \item{bot.account.id}{TODO}
@@ -30,8 +34,6 @@ mm_daemon(
 \item{init.midpoint.price}{TODO}
 
 \item{...}{TODO}
-
-\item{url}{TODO}
 }
 \description{
 Description

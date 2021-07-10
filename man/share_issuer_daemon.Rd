@@ -13,13 +13,15 @@ share_issuer_daemon(
 )
 }
 \arguments{
+\item{url.townforged}{TODO}
+
+\item{url.wallet}{TODO}
+
 \item{commodity.id}{TODO}
 
 \item{bot.account.id}{TODO}
 
 \item{...}{TODO}
-
-\item{url}{TODO}
 }
 \description{
 Description
