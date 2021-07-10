@@ -7,6 +7,7 @@
 create_share(
   url.wallet = "http://127.0.0.1:63079/json_rpc",
   commodity.id,
+  bot.account.id,
   contrib.type,
   contrib.quantity,
   contrib.transaction.height,

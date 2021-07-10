@@ -83,13 +83,14 @@ create_share <- function(
   # URL for TF RPC connection
   url.wallet = "http://127.0.0.1:63079/json_rpc",
   commodity.id,
+  bot.account.id,
   contrib.type,
   contrib.quantity,
   contrib.transaction.height,
   contrib.nonce,
   contrib.investor,
   ...) {
-
+#browser()
   stopifnot(length(contrib.type) == 1 && contrib.type %in% c("gold", "commodity"))
 
   custom.items.df <- get_custom_items(url.townforged = url.townforged)
@@ -102,23 +103,27 @@ create_share <- function(
   commodity.contrib.id <- custom.items.df$id[custom.items.df$creator == bot.account.id &
       custom.items.df$is_group & custom.items.df$commodity.contrib]
 
-  contrib.quantity.str <- round(contrib.quantity)
-  # TODO: how much to divide by?
+  if (contrib.type == "gold") {
+    contrib.quantity <- contrib.quantity/10e+7
+  }
+  contrib.quantity.str <- formatC(contrib.quantity, big.mark = ",",
+    format = "f", drop0trailing = TRUE, digits = 3)
 
   TownforgeR::tf_rpc_curl(url = url.wallet, method = "cc_new_item",
     params = list(
-      name = paste0(commodity.name, " MM bot share: ", contrib.quantity.str,
-        contrib.type, " gold contribution"),
+      name = paste0(commodity.name, " MM bot share, ", contrib.quantity.str,
+        " ", contrib.type, " contribution"),
       amount = 1,
       is_group = FALSE,
       is_public = FALSE,
-      group = ifelse(contrib.type == "gold", gold.contrib.id, commodity.contrib.id),
+      group = as.numeric(ifelse(contrib.type == "gold", gold.contrib.id, commodity.contrib.id)),
       primary_description = paste0(commodity.name, " MM bot share: ", contrib.quantity.str,
         " ", contrib.type, "\nContribution at block height: ", contrib.transaction.height,
         "\nNonce of contribution transaction: {", contrib.nonce,
         "}\nInitially issued to player ID: [", contrib.investor,
         "]\nMM bot share version: 0.1"),
-      secondary_description = ""))
+      secondary_description = "")) -> test59
+  # NOTE: Have to pass as numeric the arguments that the RPC expects as numeric. Cannot be strings
   # TODO: not sure if it's best to put the ID of the initial recipient
   # in the primary (immutable) or secondary (mutable) field
 

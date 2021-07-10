@@ -50,9 +50,9 @@ share_issuer_daemon <- function(
       create_share(
         url.wallet = url.wallet,
         commodity.id = commodity.id, # commodity.id is actually irrelevant when contrib.type = "gold"
+        bot.account.id = bot.account.id,
         contrib.type = "gold",
         contrib.quantity = gold.contribs.df.single$item.quantity,
-        # TODO: how much to divide by?
         contrib.transaction.height = gold.contribs.df.single$height,
         contrib.nonce = gold.nonce,
         contrib.investor =  gold.contribs.df.single$investor.id)
@@ -66,6 +66,7 @@ share_issuer_daemon <- function(
       create_share(
         url.wallet = url.wallet,
         commodity.id = commodity.id,
+        bot.account.id = bot.account.id,
         contrib.type = "commodity",
         contrib.quantity = commodity.contribs.df.single$item.quantity,
         # TODO: how much to divide by?
@@ -73,20 +74,20 @@ share_issuer_daemon <- function(
         contrib.nonce = commodity.nonce,
         contrib.investor =  commodity.contribs.df.single$investor.id)
     }
-
+#browser()
     # Ok this second part below checks for (recently created) items in the bot's
     # possession that should be sent to investors and then sends them
     # if they exist
 
     bot.possessed.items.df <- TownforgeR::tf_rpc_curl(url = url.townforged,
       method ="cc_get_account",
-      params = list(id = bot.account.id), num.as.string = TRUE)$result$item_balances
+      params = list(id = as.numeric(bot.account.id)), num.as.string = TRUE)$result$item_balances
 
-    bot.possessed.items.df <- as.data.frame(as.matrix(unlist(bot.possessed.items.df), ncol = 2, byrow = TRUE))
+    bot.possessed.items.df <- as.data.frame(matrix(unlist(bot.possessed.items.df), ncol = 2, byrow = TRUE))
     colnames(bot.possessed.items.df) <- c("quantity", "item.id")
 
-    extant.shares.df <- custom.items.df$id[custom.items.df$creator == bot.account.id &
-        (custom.items.df$commodity.contrib | custom.items.df$gold.contrib), drop = FALSE]
+    extant.shares.df <- custom.items.df[custom.items.df$creator == bot.account.id &
+        (custom.items.df$commodity.contrib | custom.items.df$gold.contrib), , drop = FALSE]
 
     unsent.shares.id <- intersect(bot.possessed.items.df$item.id, extant.shares.df$id)
 
@@ -98,13 +99,15 @@ share_issuer_daemon <- function(
 
       recipient.pub.key <- TownforgeR::tf_rpc_curl(url = url.townforged,
         method ="cc_get_account",
-        params = list(id = recipient.id), num.as.string = TRUE)$result$public_key
+        params = list(id = as.numeric(recipient.id)), num.as.string = TRUE)$result$public_key
       # BTW, the COMMAND_RPC_CC_LOOKUP_ACCOUNT takes public key as input and returns player ID
 
       TownforgeR::tf_rpc_curl(url = url.wallet,
         method ="cc_give",
-        params = list(type = unsent.shares.id, amount = 1, public_key = recipient.pub.key))
+        params = list(type = as.numeric(unsent.shares.id), amount = 1, public_key = recipient.pub.key))
     }
+
+    #browser()
 
     Sys.sleep(loop.sleep.time)
 

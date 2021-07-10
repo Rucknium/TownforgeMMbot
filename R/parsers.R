@@ -65,7 +65,8 @@ get_commodity_contribs  <- function(
 
   commodity.receipt.ls <- TownforgeR::tf_rpc_curl(url = url.townforged,
     method ="cc_get_game_events",
-    params = list(cmd = 16, item = commodity.id, account = bot.account.id), num.as.string = TRUE)$result$events
+    params = list(cmd = 16, item = as.numeric(commodity.id),
+      account = as.numeric(bot.account.id)), num.as.string = TRUE)$result$events
 
   commodity.receipt.ls <- lapply(commodity.receipt.ls, FUN = function(x) {
     if (substr(x$event, 1, 8) != "Received") { return(NULL) }
