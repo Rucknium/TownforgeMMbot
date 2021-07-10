@@ -37,7 +37,7 @@ create_share_item_groups <- function(
 
   TownforgeR::tf_rpc_curl(url = url.wallet, method = "cc_new_item",
     params = list(
-      name = paste0(commodity.name, " MM bot share - commodity investment"),
+      name = paste0(commodity.name, " MM bot share - commodity contribution"),
       is_group = TRUE,
       is_public = FALSE,
       primary_description = paste0(commodity.name, " placeholder."),
@@ -52,7 +52,7 @@ create_share_item_groups <- function(
 
   TownforgeR::tf_rpc_curl(url = url.wallet, method = "cc_new_item",
     params = list(
-      name = paste0(commodity.name, " MM bot share - gold investment"),
+      name = paste0(commodity.name, " MM bot share - gold contribution"),
       is_group = TRUE,
       is_public = FALSE,
       primary_description = paste0(commodity.name, " placeholder."),
@@ -60,5 +60,67 @@ create_share_item_groups <- function(
     nonce.as.string = TRUE)
 
   return(invisible(NULL))
+}
 
+
+#' Creates shares. Option for gold contribution or commodity contribution.
+#'
+#' Description
+#'
+#' @param url.wallet TODO
+#' @param	commodity.id TODO
+#' @param	contrib.type TODO
+#' @param	contrib.quantity TODO
+#' @param	contrib.transaction.height TODO
+#' @param	contrib.nonce TODO
+#' @param	contrib.investor TODO
+#' @param ... TODO
+#'
+#' @details TODO
+#'
+#' @export
+create_share <- function(
+  # URL for TF RPC connection
+  url.wallet = "http://127.0.0.1:63079/json_rpc",
+  commodity.id,
+  contrib.type,
+  contrib.quantity,
+  contrib.transaction.height,
+  contrib.nonce,
+  contrib.investor,
+  ...) {
+
+  stopifnot(length(contrib.type) == 1 && contrib.type %in% c("gold", "commodity"))
+
+  custom.items.df <- get_custom_items(url.townforged = url.townforged)
+
+  gold.contrib.id <- custom.items.df$id[custom.items.df$creator == bot.account.id &
+      custom.items.df$is_group & custom.items.df$gold.contrib]
+  # For item groups, "id" is the group id and "group" is 0. For items within a group,
+  # "id" is the item id and "group" is the id of the group that it belongs to.
+
+  commodity.contrib.id <- custom.items.df$id[custom.items.df$creator == bot.account.id &
+      custom.items.df$is_group & custom.items.df$commodity.contrib]
+
+  contrib.quantity.str <- round(contrib.quantity)
+  # TODO: how much to divide by?
+
+  TownforgeR::tf_rpc_curl(url = url.wallet, method = "cc_new_item",
+    params = list(
+      name = paste0(commodity.name, " MM bot share: ", contrib.quantity.str,
+        contrib.type, " gold contribution"),
+      amount = 1,
+      is_group = FALSE,
+      is_public = FALSE,
+      group = ifelse(contrib.type == "gold", gold.contrib.id, commodity.contrib.id),
+      primary_description = paste0(commodity.name, " MM bot share: ", contrib.quantity.str,
+        " ", contrib.type, "\nContribution at block height: ", contrib.transaction.height,
+        "\nNonce of contribution transaction: {", contrib.nonce,
+        "}\nInitially issued to player ID: [", contrib.investor,
+        "]\nMM bot share version: 0.1"),
+      secondary_description = ""))
+  # TODO: not sure if it's best to put the ID of the initial recipient
+  # in the primary (immutable) or secondary (mutable) field
+
+  return(invisible(NULL))
 }

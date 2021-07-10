@@ -9,7 +9,7 @@
 #' @details TODO
 #'
 #' @export
-get_gold_investors <- function(
+get_gold_contribs <- function(
   url.townforged = "http://127.0.0.1:18881/json_rpc", # "http://127.0.0.1:28881/json_rpc"
   bot.account.id,
   ...) {
@@ -45,7 +45,7 @@ get_gold_investors <- function(
 
 
 
-#' Produces a data.frame containing instances of investors sending the bot the commodity under its management
+#' Produces a data.frame containing instances of investors sending the bot the commodity type under its management
 #'
 #' Description
 #'
@@ -57,7 +57,7 @@ get_gold_investors <- function(
 #' @details TODO
 #'
 #' @export
-get_commodity_investors  <- function(
+get_commodity_contribs  <- function(
   url.townforged = "http://127.0.0.1:18881/json_rpc", # "http://127.0.0.1:28881/json_rpc"
   commodity.id,
   bot.account.id,
@@ -112,5 +112,7 @@ get_custom_items <- function(
     "is_public", "name", "pdesc", "sdesc", "user_data.1", "user_data.2", "user_data.3", "user_data.4")
 
   custom.items.df$is_group <- as.logical(custom.items.df$is_group)
+  custom.items.df$commodity.contrib <- grepl("commodity contribution", custom.items.df$name)
+  custom.items.df$gold.contrib <- grepl("gold contribution", custom.items.df$name)
   custom.items.df
 }

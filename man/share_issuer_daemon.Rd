@@ -9,6 +9,7 @@ share_issuer_daemon(
   url.wallet = "http://127.0.0.1:63079/json_rpc",
   commodity.id,
   bot.account.id,
+  loop.sleep.time = 10,
   ...
 )
 }
@@ -20,6 +21,8 @@ share_issuer_daemon(
 \item{commodity.id}{TODO}
 
 \item{bot.account.id}{TODO}
+
+\item{loop.sleep.time}{TODO}
 
 \item{...}{TODO}
 }
