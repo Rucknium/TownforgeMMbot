@@ -10,7 +10,7 @@
 #'
 #' @export
 get_gold_investors <- function(
-  url.townforged,
+  url.townforged = "http://127.0.0.1:18881/json_rpc", # "http://127.0.0.1:28881/json_rpc"
   bot.account.id,
   ...) {
 
@@ -58,7 +58,7 @@ get_gold_investors <- function(
 #'
 #' @export
 get_commodity_investors  <- function(
-  url.townforged,
+  url.townforged = "http://127.0.0.1:18881/json_rpc", # "http://127.0.0.1:28881/json_rpc"
   commodity.id,
   bot.account.id,
   ...) {
@@ -80,4 +80,37 @@ get_commodity_investors  <- function(
   colnames(commodity.receipt.df)[colnames(commodity.receipt.df) == "counterparties"] <- "investor.id"
   col.rearrange <- c("investor.id", "item.id", "item.quantity", "event", "height", "nonce", "tx_fee")
   commodity.receipt.df[, col.rearrange, drop = FALSE]
+}
+
+
+#' Produces a data.frame containing player-made items
+#'
+#' Description
+#'
+#' @param url.townforged TODO
+#' @param ... TODO
+#'
+#' @details TODO
+#'
+#' @export
+get_custom_items <- function(
+  url.townforged = "http://127.0.0.1:18881/json_rpc", # "http://127.0.0.1:28881/json_rpc"
+  ...) {
+
+  custom.items.df <- unlist(TownforgeR::tf_rpc_curl(
+    url = url.townforged, method ="cc_get_custom_items",
+    params = list(), num.as.string = TRUE)$result$items)
+  # TODO: figure out how to deal with issue of inability to pass a vector data type bto
+  # the ids argument when I actually just want one of them, which is required by the method
+
+  stopifnot(length(custom.items.df) %% 21 == 0 )  # "%%" is the modulo operation
+  # Relying on the "flattened" return being of length 21 always
+
+  custom.items.df <- as.data.frame(matrix(custom.items.df, ncol = 21, byrow = TRUE))
+  colnames(custom.items.df) <- c("amount", "coin_design", "creation_height", "creator", "gold",
+    "group", "hash", "id", "ignore", "ipfs_data", "ipfs_error", "ipfs_multihash", "is_group",
+    "is_public", "name", "pdesc", "sdesc", "user_data.1", "user_data.2", "user_data.3", "user_data.4")
+
+  custom.items.df$is_group <- as.logical(custom.items.df$is_group)
+  custom.items.df
 }

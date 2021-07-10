@@ -4,7 +4,12 @@
 \alias{get_commodity_investors}
 \title{Produces a data.frame containing instances of investors sending the bot the commodity under its management}
 \usage{
-get_commodity_investors(url.townforged, commodity.id, bot.account.id, ...)
+get_commodity_investors(
+  url.townforged = "http://127.0.0.1:18881/json_rpc",
+  commodity.id,
+  bot.account.id,
+  ...
+)
 }
 \arguments{
 \item{url.townforged}{TODO}
