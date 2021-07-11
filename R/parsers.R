@@ -14,17 +14,19 @@ get_gold_contribs <- function(
   bot.account.id,
   ...) {
 
+  #browser()
+
   gold.receipt.ls <- TownforgeR::tf_rpc_curl(url = url.townforged,
     method ="cc_get_game_events",
     params = list(cmd = 2), num.as.string = TRUE)$result$events
   # TODO: Can narrow down the block height with min_height argument, which may be faster
 
   gold.receipt.ls <- unlist(gold.receipt.ls)
-  stopifnot(length(gold.receipt.ls) %% 9 == 0 )  # "%%" is the modulo operation
+  stopifnot(length(gold.receipt.ls) %% 7 == 0 )  # "%%" is the modulo operation
 
-  gold.receipt.df <- as.data.frame(matrix(gold.receipt.ls, ncol = 9, byrow = TRUE))
+  gold.receipt.df <- as.data.frame(matrix(gold.receipt.ls, ncol = 7, byrow = TRUE))
   colnames(gold.receipt.df) <- c("account", "balance", "cmd", "event", "height",
-    "items.amount", "items.type", "nonce", "tx_fee")
+    "nonce", "tx_fee")
   # NOTE: This relies upon the return value having exactly 9 elements, which is safe for now, but might always be the case.
   gold.receipt.df$balance <- as.numeric(gold.receipt.df$balance)
   receipt.nonces <- gold.receipt.df$nonce[gold.receipt.df$balance > 0 & gold.receipt.df$account == bot.account.id]
@@ -34,7 +36,7 @@ get_gold_contribs <- function(
   gold.receipt.df <- gold.receipt.df[gold.receipt.df$balance < 0 & gold.receipt.df$nonce %in% receipt.nonces, , drop = FALSE]
   colnames(gold.receipt.df)[colnames(gold.receipt.df) == "account"] <- "investor.id"
   gold.receipt.df$item.id <- "gold"
-  gold.receipt.df$item.quantity <- gold.receipt.df$balance
+  gold.receipt.df$item.quantity <- abs(gold.receipt.df$balance) # abs() since this is expressed as a negative number
 
   gold.receipt.df[, c("investor.id", "item.id", "item.quantity", "event", "height", "nonce", "tx_fee")]
 

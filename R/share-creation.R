@@ -81,6 +81,7 @@ create_share_item_groups <- function(
 #' @export
 create_share <- function(
   # URL for TF RPC connection
+  url.townforged = "http://127.0.0.1:18881/json_rpc", # "http://127.0.0.1:28881/json_rpc"
   url.wallet = "http://127.0.0.1:63079/json_rpc",
   commodity.id,
   bot.account.id,
@@ -92,6 +93,26 @@ create_share <- function(
   ...) {
 #browser()
   stopifnot(length(contrib.type) == 1 && contrib.type %in% c("gold", "commodity"))
+
+  commodity.id.key <- as.data.frame(matrix(c(
+    1, "Sandstone",
+    2, "Granite",
+    3, "Marble",
+    4, "Pine",
+    5, "Oak",
+    6, "Teak",
+    8, "Runestone",
+    256, "Labour",
+    257, "Firewood",
+    1024, "Vegetables",
+    1025, "Grain",
+    1026, "Meat",
+    1027, "Salted meat"
+  ), ncol = 2, byrow = TRUE))
+  colnames(commodity.id.key) <- c("id", "name")
+  # TODO: make this a data object in the package
+
+  commodity.name <- commodity.id.key$name[commodity.id.key$id == commodity.id]
 
   custom.items.df <- get_custom_items(url.townforged = url.townforged)
 
@@ -117,12 +138,12 @@ create_share <- function(
       is_group = FALSE,
       is_public = FALSE,
       group = as.numeric(ifelse(contrib.type == "gold", gold.contrib.id, commodity.contrib.id)),
-      primary_description = paste0(commodity.name, " MM bot share: ", contrib.quantity.str,
-        " ", contrib.type, "\nContribution at block height: ", contrib.transaction.height,
-        "\nNonce of contribution transaction: {", contrib.nonce,
-        "}\nInitially issued to player ID: [", contrib.investor,
-        "]\nMM bot share version: 0.1"),
-      secondary_description = "")) -> test59
+      primary_description = paste0("\t", commodity.name, " MM bot share: ", contrib.quantity.str,
+        " ", contrib.type, "\n\tContribution at block height: ", contrib.transaction.height,
+        "\n\tNonce of contribution transaction: {", contrib.nonce,
+        "}\n\tInitially issued to player ID: [", contrib.investor,
+        "]\n\tMM bot share version: <0.1>"),
+      secondary_description = ""))
   # NOTE: Have to pass as numeric the arguments that the RPC expects as numeric. Cannot be strings
   # TODO: not sure if it's best to put the ID of the initial recipient
   # in the primary (immutable) or secondary (mutable) field

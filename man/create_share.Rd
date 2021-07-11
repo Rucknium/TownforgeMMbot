@@ -5,6 +5,7 @@
 \title{Creates shares. Option for gold contribution or commodity contribution.}
 \usage{
 create_share(
+  url.townforged = "http://127.0.0.1:18881/json_rpc",
   url.wallet = "http://127.0.0.1:63079/json_rpc",
   commodity.id,
   bot.account.id,
