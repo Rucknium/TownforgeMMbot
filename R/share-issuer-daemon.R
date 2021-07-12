@@ -7,6 +7,7 @@
 #' @param commodity.id TODO
 #' @param	bot.account.id TODO
 #' @param	loop.sleep.time TODO
+#' @param	verbose TODO
 #' @param ... TODO
 #'
 #' @details TODO
@@ -19,7 +20,10 @@ share_issuer_daemon <- function(
   commodity.id,
   bot.account.id,
   loop.sleep.time = 10, # Time in seconds
+  verbose = FALSE,
   ...) {
+
+  # NOTE: Do not turn on the bot until it has gotten at least one contrib each in gold and commodity
 
   shares.to.be.sent.pending.in.mempool <- c()
   gold.shares.to.create.pending.in.mempool <- c()
@@ -28,7 +32,9 @@ share_issuer_daemon <- function(
   while (TRUE) {
 #browser()
     custom.items.df <- get_custom_items(url.townforged = url.townforged)
-    # NOTE: Do not turn on the bot until it has gotten at least one contrib each in gold and commodity
+    # NOTE: Destroyed shares will appear here. This fact prevents shares
+    # from being re-issued after being destroyed. The "amount" column
+    # will be zero for destroyed items
 
     nonces.issued.gold.shares <- gsub("(^.*[{])([0-9]+)([}].*$)", "\\2",
       custom.items.df$pdesc[custom.items.df$gold.contrib & (! custom.items.df$is_group) ])
@@ -44,8 +50,8 @@ share_issuer_daemon <- function(
 
     gold.shares.to.create <- setdiff(gold.contribs.df$nonce, nonces.issued.gold.shares)
     commodity.shares.to.create <- setdiff(commodity.contribs.df$nonce, nonces.issued.commodity.shares)
-    gold.shares.to.create <- setdiff(gold.contribs.df$nonce, gold.shares.to.create.pending.in.mempool)
-    commodity.shares.to.create <- setdiff(commodity.contribs.df$nonce, commodity.shares.to.create.pending.in.mempool)
+    gold.shares.to.create <- setdiff(gold.shares.to.create, gold.shares.to.create.pending.in.mempool)
+    commodity.shares.to.create <- setdiff(commodity.shares.to.create, commodity.shares.to.create.pending.in.mempool)
     # These are in the form of nonces
 
     for (gold.nonce in gold.shares.to.create) {
@@ -53,7 +59,7 @@ share_issuer_daemon <- function(
       gold.contribs.df.single <- gold.contribs.df[
         gold.contribs.df$nonce == gold.nonce, , drop = FALSE]
 
-      create.share.return <- create_share(
+      create_share(
         url.townforged = url.townforged,
         url.wallet = url.wallet,
         commodity.id = commodity.id, # commodity.id is actually irrelevant when contrib.type = "gold"
@@ -62,7 +68,8 @@ share_issuer_daemon <- function(
         contrib.quantity = gold.contribs.df.single$item.quantity,
         contrib.transaction.height = gold.contribs.df.single$height,
         contrib.nonce = gold.nonce,
-        contrib.investor =  gold.contribs.df.single$investor.id)
+        contrib.investor =  gold.contribs.df.single$investor.id,
+        verbose = verbose)
 
       gold.shares.to.create.pending.in.mempool <- c(gold.shares.to.create.pending.in.mempool, gold.nonce)
     }
@@ -82,7 +89,8 @@ share_issuer_daemon <- function(
         # TODO: how much to divide by?
         contrib.transaction.height = commodity.contribs.df.single$height,
         contrib.nonce = commodity.nonce,
-        contrib.investor =  commodity.contribs.df.single$investor.id)
+        contrib.investor =  commodity.contribs.df.single$investor.id,
+        verbose = verbose)
 
       commodity.shares.to.create.pending.in.mempool <- c(commodity.shares.to.create.pending.in.mempool, commodity.nonce)
     }
@@ -125,16 +133,17 @@ share_issuer_daemon <- function(
           paste0("[{\"type\": ", share.to.be.sent, ", \"amount\": ", 1, "}] ")
           )
 
+      if (verbose) {
+        cat(base::date(), "\n\tItem ", share.to.be.sent, " sent to player ", recipient.id, "\n\n", sep = "")
+      }
+
       shares.to.be.sent.pending.in.mempool <- c(shares.to.be.sent.pending.in.mempool, share.to.be.sent)
 
     }
 
     #browser()
-
     Sys.sleep(loop.sleep.time)
 
-
   }
-
 
 }

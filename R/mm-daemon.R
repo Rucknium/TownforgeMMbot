@@ -10,6 +10,7 @@
 #' @param	price.increment TODO
 #' @param	price.steps TODO
 #' @param	init.midpoint.price TODO
+#' @param	loop.sleep.time TODO
 #' @param ... TODO
 #'
 #' @details TODO
@@ -25,7 +26,22 @@ mm_daemon <- function(
   price.increment,
   price.steps,
   init.midpoint.price,
+  cancel.all.orders.and.exit = FALSE,
+  loop.sleep.time = 10,
+  verbose = FALSE,
   ...) {
+
+
+  if (cancel.all.orders.and.exit) {
+    order.bk.df <- TownforgeR::tf_parse_markets(url = url.townforged)
+    order.bk.df <- order.bk.df[order.bk.df$account == bot.account.id & order.bk.df$id == commodity.id, , drop = FALSE]
+
+    for (i in order.bk.df$nonce) {
+      TownforgeR::tf_rpc_curl(url = url.wallet, method = "cc_cancel_nonce",
+        params = list(nonce = i ))
+    }
+    return(invisible(NULL))
+  }
 
 
 
@@ -88,7 +104,7 @@ mm_daemon <- function(
 
   while (TRUE) {
 
-    Sys.sleep(5)
+    Sys.sleep(loop.sleep.time)
 
     #data.table::`%chin%`("a" , "a" )
     #data.table::fsetdiff("a" , "a" )
@@ -144,11 +160,11 @@ mm_daemon <- function(
     ask.price <-      midpoint.price + price.increment * seq_len(price.steps)
 
 
-    order.bk.df <- TownforgeR::tf_parse_markets(url = url)
-    order.bk.df <- order.bk.df[order.bk.df$account == bot.account.id & order.bk.df$id == commodity.id, ]
+    order.bk.df <- TownforgeR::tf_parse_markets(url = url.townforged)
+    order.bk.df <- order.bk.df[order.bk.df$account == bot.account.id & order.bk.df$id == commodity.id, , drop = FALSE]
 
-    bid.bk.df <- order.bk.df[   order.bk.df$bid, ]
-    ask.bk.df <- order.bk.df[ ! order.bk.df$bid, ]
+    bid.bk.df <- order.bk.df[   order.bk.df$bid, , drop = FALSE]
+    ask.bk.df <- order.bk.df[ ! order.bk.df$bid, , drop = FALSE]
 
     order.iter <- 1
 
@@ -211,7 +227,7 @@ mm_daemon <- function(
         new.height <- TownforgeR::tf_rpc_curl(url = url.townforged, method ="get_block_count",
           params = list(), num.as.string = FALSE)$result$count
 
-        Sys.sleep(2.5)
+        Sys.sleep(ceiling(loop.sleep.time / 2))
         # TODO: determine the best sleep time. maybe this command is why Im getting
         # "Exception at while refreshing, what=no connection to daemon"
 

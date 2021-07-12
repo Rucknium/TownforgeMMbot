@@ -74,6 +74,7 @@ create_share_item_groups <- function(
 #' @param	contrib.transaction.height TODO
 #' @param	contrib.nonce TODO
 #' @param	contrib.investor TODO
+#' @param	verbose TODO
 #' @param ... TODO
 #'
 #' @details TODO
@@ -90,6 +91,7 @@ create_share <- function(
   contrib.transaction.height,
   contrib.nonce,
   contrib.investor,
+  verbose = FALSE,
   ...) {
 #browser()
   stopifnot(length(contrib.type) == 1 && contrib.type %in% c("gold", "commodity"))
@@ -130,6 +132,16 @@ create_share <- function(
   contrib.quantity.str <- formatC(contrib.quantity, big.mark = ",",
     format = "f", drop0trailing = TRUE, digits = 3)
 
+  primary.desciption <- paste0("\t", commodity.name, " MM bot share: ", contrib.quantity.str,
+    " ", contrib.type, "\n\tContribution at block height: <", contrib.transaction.height,
+    ">\n\tNonce of contribution transaction: {", contrib.nonce,
+    "}\n\tInitially issued to player ID: [", contrib.investor,
+    "]\n\tMM bot share version: |0.1|")
+
+  if (verbose) {
+    cat(base::date(), "\n", primary.desciption, "\n\n", sep = "")
+  }
+
   TownforgeR::tf_rpc_curl(url = url.wallet, method = "cc_new_item",
     params = list(
       name = paste0(commodity.name, " MM bot share, ", contrib.quantity.str,
@@ -138,11 +150,7 @@ create_share <- function(
       is_group = FALSE,
       is_public = FALSE,
       group = as.numeric(ifelse(contrib.type == "gold", gold.contrib.id, commodity.contrib.id)),
-      primary_description = paste0("\t", commodity.name, " MM bot share: ", contrib.quantity.str,
-        " ", contrib.type, "\n\tContribution at block height: ", contrib.transaction.height,
-        "\n\tNonce of contribution transaction: {", contrib.nonce,
-        "}\n\tInitially issued to player ID: [", contrib.investor,
-        "]\n\tMM bot share version: <0.1>"),
+      primary_description = primary.desciption,
       secondary_description = ""))
   # NOTE: Have to pass as numeric the arguments that the RPC expects as numeric. Cannot be strings
   # TODO: not sure if it's best to put the ID of the initial recipient

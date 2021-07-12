@@ -14,6 +14,7 @@ create_share(
   contrib.transaction.height,
   contrib.nonce,
   contrib.investor,
+  verbose = FALSE,
   ...
 )
 }
@@ -31,6 +32,8 @@ create_share(
 \item{contrib.nonce}{TODO}
 
 \item{contrib.investor}{TODO}
+
+\item{verbose}{TODO}
 
 \item{...}{TODO}
 }

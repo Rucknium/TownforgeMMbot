@@ -10,6 +10,7 @@ share_issuer_daemon(
   commodity.id,
   bot.account.id,
   loop.sleep.time = 10,
+  verbose = FALSE,
   ...
 )
 }
@@ -23,6 +24,8 @@ share_issuer_daemon(
 \item{bot.account.id}{TODO}
 
 \item{loop.sleep.time}{TODO}
+
+\item{verbose}{TODO}
 
 \item{...}{TODO}
 }

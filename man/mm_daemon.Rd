@@ -13,6 +13,9 @@ mm_daemon(
   price.increment,
   price.steps,
   init.midpoint.price,
+  cancel.all.orders.and.exit = FALSE,
+  loop.sleep.time = 10,
+  verbose = FALSE,
   ...
 )
 }
@@ -32,6 +35,8 @@ mm_daemon(
 \item{price.steps}{TODO}
 
 \item{init.midpoint.price}{TODO}
+
+\item{loop.sleep.time}{TODO}
 
 \item{...}{TODO}
 }
